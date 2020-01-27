@@ -58,7 +58,7 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
           pp answer
         end
 
-        @mqtt.publish 'homebus/device' + @uuid,
+        @mqtt.publish 'homebus/device/' + @uuid,
                       JSON.generate(answer),
                       true
       end
