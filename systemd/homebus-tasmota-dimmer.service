@@ -1,0 +1,18 @@
+[Unit]
+Description=HomeBus Tasmota Dimmer pulisher
+After=network.target
+
+[Service]
+Type=simple
+
+User=homebus
+WorkingDirectory=/home/homebus/homebus-tasmota-dimmer
+
+ExecStart=/home/homebus/.rbenv/bin/rbenv exec bundle exec homebus-tasmota-dimmer.rb
+TimeoutSec=30
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
