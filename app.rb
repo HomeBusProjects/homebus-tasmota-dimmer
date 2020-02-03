@@ -10,6 +10,7 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
   def initialize(options)
     @options = options
     @old_brightness = nil
+    @old_power = nil
     super
   end
 
@@ -23,33 +24,59 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
     @url = ENV['TASMOTA_DIMMER_URL']
   end
 
-  def work!
+  def _get_dimmer
     uri = URI(@url+ '/cm?cmnd=Dimmer')
+    results = Net::HTTP.get(uri)
 
+    if options[:verbose]
+      puts 'dimmer response (raw)'
+      pp results
+    end
+
+    tasmota = JSON.parse results, symbolize_names: true
+
+    if options[:verbose]
+      puts 'dimmer response (JSON):'
+      pp tasmota
+    end
+
+    tasmota[:Dimmer]
+  end
+
+  def _get_power
+    uri = URI(@url+ '/cm?cmnd=Power')
+    results = Net::HTTP.get(uri)
+
+    if options[:verbose]
+      puts 'power response (raw)'
+      pp results
+    end
+
+    tasmota = JSON.parse results, symbolize_names: true
+
+    if options[:verbose]
+      puts 'power response (JSON):'
+      pp tasmota
+    end
+
+    tasmota[:POWER]
+  end
+
+  def work!
     begin
-      results = Net::HTTP.get(uri)
+      tasmota_dimmer = _get_dimmer
+      tasmota_power = _get_power
 
-      if options[:verbose]
-        puts 'dimmer response (raw)'
-        pp results
-      end
-
-      tasmota = JSON.parse results, symbolize_names: true
-
-      if options[:verbose]
-        puts 'dimmer response (JSON):'
-        pp tasmota
-      end
-
-      if @old_brightness != tasmota[:Dimmer]
-        @old_brightness = tasmota[:Dimmer]
+      if @old_brightness != tasmota_dimmer || @old_power != tasmota_power
+        @old_brightness = tasmota_dimmer
+        @old_power = tasmota_power
 
         answer =  {
           id: @uuid,
           timestamp: Time.now.to_i,
           'org.homebus.light-switch': {
-                                        state: tasmota[:Dimmer] > 0 ? 'on' : 'off',
-                                        brightness: tasmota[:Dimmer]
+                                        state: tasmota_power == 'ON' ? 'on' : 'off',
+                                        brightness: tasmota_dimmer
                                       }
         }
  
@@ -95,7 +122,7 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
 
   def devices
     [
-      { friendly_name: 'Air Quality Index',
+      { friendly_name: 'Tasmota Dimmer Switch',
         friendly_location: 'Portland, OR',
         update_frequency: update_delay,
         index: 0,
