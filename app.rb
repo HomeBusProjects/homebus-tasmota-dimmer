@@ -7,6 +7,8 @@ require 'net/http'
 require 'json'
 
 class TasmotaDimmerHomeBusApp < HomeBusApp
+  DDC = 'org.homebus.experimental.switch'
+
   def initialize(options)
     @options = options
     @old_brightness = nil
@@ -22,9 +24,14 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
     Dotenv.load('.env')
 
     @url = ENV['TASMOTA_DIMMER_URL']
+    @power_only = ENV['POWER_ONLY']
   end
 
   def _get_dimmer
+    if @power_only
+      return nil
+    end
+
     uri = URI(@url+ '/cm?cmnd=Dimmer')
     results = Net::HTTP.get(uri)
 
@@ -63,8 +70,13 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
   end
 
   def work!
+    tasmota_dimmer = nil
+
     begin
-      tasmota_dimmer = _get_dimmer
+      unless @power_only
+        tasmota_dimmer = _get_dimmer
+      end
+
       tasmota_power = _get_power
 
       if @old_brightness != tasmota_dimmer || @old_power != tasmota_power
@@ -73,21 +85,23 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
 
         answer =  {
           id: @uuid,
-          timestamp: Time.now.to_i,
-          'org.homebus.light-switch': {
-                                        state: tasmota_power == 'ON' ? 'on' : 'off',
-                                        brightness: tasmota_dimmer
-                                      }
+          timestamp: Time.now.to_i
         }
+
+        answer[DDC] =  {
+          state: tasmota_power == 'ON' ? 'on' : 'off'
+        }
+
+        unless @power_only
+          answer[][:brightness] = tasmota_dimmer
+        end
  
         if options[:verbose]
           puts 'homebus publish'
           pp answer
         end
 
-        @mqtt.publish 'homebus/device/' + @uuid,
-                      JSON.generate(answer),
-                      true
+        publish! DDC, answer
       end
     rescue
       puts "FAIL"
