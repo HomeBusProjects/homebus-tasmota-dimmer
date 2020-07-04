@@ -83,12 +83,7 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
         @old_brightness = tasmota_dimmer
         @old_power = tasmota_power
 
-        answer =  {
-          id: @uuid,
-          timestamp: Time.now.to_i
-        }
-
-        answer[DDC] =  {
+        answer = {
           state: tasmota_power == 'ON' ? 'on' : 'off'
         }
 
