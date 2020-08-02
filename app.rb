@@ -88,7 +88,7 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
         }
 
         unless @power_only
-          answer[][:brightness] = tasmota_dimmer
+          answer[:brightness] = tasmota_dimmer
         end
  
         if options[:verbose]
@@ -137,7 +137,7 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
         index: 0,
         accuracy: 0,
         precision: 0,
-        wo_topics: [ 'org.homebus.light-switch' ],
+        wo_topics: [ DDC ],
         ro_topics: [],
         rw_topics: []
       }
