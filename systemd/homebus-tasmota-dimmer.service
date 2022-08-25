@@ -7,8 +7,7 @@ Type=simple
 
 User=homebus
 WorkingDirectory=/home/homebus/homebus-tasmota-dimmer
-
-ExecStart=/home/homebus/.rbenv/bin/rbenv exec bundle exec homebus-tasmota-dimmer.rb
+ExecStart=/home/homebus/.rbenv/bin/rbenv exec bundle exec bin/homebus-tasmota-dimmer
 TimeoutSec=30
 
 Restart=always
