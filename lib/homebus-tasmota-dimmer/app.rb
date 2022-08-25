@@ -1,12 +1,11 @@
 # coding: utf-8
 require 'homebus'
-require 'homebus_app'
-require 'mqtt'
+
 require 'dotenv'
 require 'net/http'
 require 'json'
 
-class TasmotaDimmerHomeBusApp < HomeBusApp
+class HomebusTasmotaDimmer::App < Homebus::App
   DDC = 'org.homebus.experimental.switch'
 
   def initialize(options)
@@ -23,8 +22,13 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
   def setup!
     Dotenv.load('.env')
 
-    @url = ENV['TASMOTA_DIMMER_URL']
+    @url = @options[:url] || ENV['TASMOTA_DIMMER_URL']
     @power_only = ENV['POWER_ONLY']
+
+    @device = Homebus::Device.new name: "Homebus Tasmota bridge for #{@url}",
+                                  manufacturer: 'Homebus',
+                                  model: 'Tasmota bridge',
+                                  serial_number: @url
   end
 
   def _get_dimmer
@@ -96,7 +100,7 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
           pp answer
         end
 
-        publish! DDC, answer
+        @device.publish! DDC, answer
       end
     rescue
       puts "FAIL"
@@ -105,42 +109,15 @@ class TasmotaDimmerHomeBusApp < HomeBusApp
     sleep update_delay
   end
 
-  def manufacturer
-    'HomeBus'
+  def name
+    'HomeBus Tasmota bridge'
   end
 
-  def model
-    'Tasmota Dimmer Adapter'
-  end
-
-  def friendly_name
-    'Tasmota Dimmer Adapter'
-  end
-
-  def friendly_location
-    ''
-  end
-
-  def serial_number
-    @url
-  end
-
-  def pin
-    ''
+  def publishes
+    [ DDC ]
   end
 
   def devices
-    [
-      { friendly_name: 'Tasmota Dimmer Switch',
-        friendly_location: 'Portland, OR',
-        update_frequency: update_delay,
-        index: 0,
-        accuracy: 0,
-        precision: 0,
-        wo_topics: [ DDC ],
-        ro_topics: [],
-        rw_topics: []
-      }
-    ]
+    [ @device ]
   end
 end

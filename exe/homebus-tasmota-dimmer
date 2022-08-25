@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'homebus-tasmota-dimmer/options'
+require 'homebus-tasmota-dimmer/app'
+
+tasmota_app_options = HomebusTasmotaDimmer::Options.new
+
+tasmota = HomebusTasmotaDimmer::App.new tasmota_app_options.options
+tasmota.run!

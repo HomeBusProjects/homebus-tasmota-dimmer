@@ -1,30 +1,29 @@
 GIT
-  remote: git@github.com:HomeBusProjects/ruby-homebus-application.git
-  revision: ddad977a473545fbc1a299d27a739f384b8861e2
-  specs:
-    homebus_app (0.9.1)
-      dotenv
-      mqtt
-
-GIT
   remote: https://github.com/HomeBusProjects/ruby-homebus
-  revision: 64d64f26adf2e82d4c8cb7219bdd534f2275f817
+  revision: f0fff8e41734fee104259ee626e257a0cadd2eff
+  branch: main
   specs:
-    homebus (0.3.1)
+    homebus (0.30.2)
+      mqtt (~> 0.5.0)
+
+PATH
+  remote: .
+  specs:
+    homebus-tasmota-dimmer (0.2.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    dotenv (2.7.6)
+    dotenv (2.8.1)
     mqtt (0.5.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  dotenv
   homebus!
-  homebus_app!
-  mqtt
+  homebus-tasmota-dimmer!
 
 BUNDLED WITH
-   2.1.2
+   2.3.19
